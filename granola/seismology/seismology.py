@@ -23,20 +23,29 @@ def get_lc(id, KPLR_DIR):
     x, y, yerr = kd.load_kepler_data(os.path.join(KPLR_DIR, "{}".format(kid)))
     return x, y, yerr
 
-
-if __name__ == "__main__":
-
-    # load van saders table
-    DATA_DIR = "/Users/ruthangus/projects/granola/granola/data"
-    DATA_DIR = "/export/bbq2/angusr/granola/granola/data"
-    data = pd.read_csv(os.path.join(DATA_DIR, "vanSaders.txt"))
-    kics = data.KIC
-
-    KPLR_DIR = "/Users/ruthangus/.kplr/data/lightcurves"
-    KPLR_DIR = "/home/angusr/.kplr/data/lightcurves"
+def measure_periods(kics):
     for kic in kics:
         print("KepID = ", kic)
         x, y, yerr = get_lc(kic, KPLR_DIR)
 
         # Use GProtation to get probabilistic rotation periods.
         gp = fit(x, y, yerr, kic)
+
+if __name__ == "__main__":
+
+    # load van saders table
+#     DATA_DIR = "/Users/ruthangus/projects/granola/granola/data"
+    DATA_DIR = "/export/bbq2/angusr/granola/granola/data"
+
+    # van saders data.
+    data = pd.read_csv(os.path.join(DATA_DIR, "vanSaders.txt"))
+    kics = data.KIC
+
+#     KPLR_DIR = "/Users/ruthangus/.kplr/data/lightcurves"
+    KPLR_DIR = "/home/angusr/.kplr/data/lightcurves"
+    measure_periods(kics, KPLR_DIR)
+
+    # Metcalfe data.
+
+    # Silva Aguirre data.
+
