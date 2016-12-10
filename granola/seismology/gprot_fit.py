@@ -35,7 +35,7 @@ class fit(object):
         self.acf_period, _, self.pgram_period, _ = self.calc_p_init()
 
     def gp_fit(self, burnin=1000, nwalkers=16, nruns=5, full_run=1000,
-               nsets=None):
+               nsets=None, p_max=None):
         """
         param nsets: (int or None)
             The number of light curve sets.
@@ -44,7 +44,8 @@ class fit(object):
 
         # set initial period
         p_init = self.acf_period
-        p_max = np.log((self.xb[0][-1] - self.xb[0][0]) / 2.)
+        if not p_max:
+            p_max = np.log((self.xb[0][-1] - self.xb[0][0]) / 2.)
         if p_init > np.exp(p_max):
             p_init = 40
         elif p_init < .5:
