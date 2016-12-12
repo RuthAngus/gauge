@@ -63,7 +63,7 @@ if __name__ == "__main__":
     dataset = str(sys.argv[1])
 
     pool = Pool()
-    if dataset == "metcalfe"
+    if dataset == "metcalfe":
         results = pool.map(parallel, range(nmetcalfe))
     else:
         results = pool.map(parallel, range(nsilva))
