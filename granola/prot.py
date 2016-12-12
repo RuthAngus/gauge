@@ -50,16 +50,30 @@ def get_period_samples(x, y, nsamps=1000, ndays=200, pfunc=.1):
 
 if __name__ == "__main__":
 
-    # load kepler ids
-    DATA_DIR = "/Users/ruthangus/projects/gauge/gauge/data"
+    DATA_DIR = "/Users/ruthangus/projects/granola/granola/data"
+    RESULTS_DIR = "results"
+    if not os.path.exists(RESULTS_DIR):
+        os.makedirs(RESULTS_DIR)
+
+    # load KIC-TGAS
     data = pd.read_csv(os.path.join(DATA_DIR, "kic_tgas.csv"))
 
-    for i in range(1):
-        x, y, yerr = get_lc(data.kepid.values[i])
+    # cut on temperature and logg
+    m = (6250 < data.teff.values) * (4 < data.logg.values)
+    data = data.iloc[m]
+
+    fp = h5py.File(os.path.join(RESULTS_DIR, "acf_period_samples.h5"), "w")
+    # fa = h5py.File(os.path.join(RESULTS_DIR, "age_samples.h5"), "w")
+    for i, kic in enumerate(data.kepid.values[:100]):
+        print(kic, i, "of", len(data.kepid.values[:100]))
+        x, y, yerr = get_lc(kic)
         period, samples = get_period_samples(x, y)
 
-    # save the samples somehow.
-    f = h5py.File(os.path.join(RESULTS_DIR, "{0}.h5".format(id)), "w")
-    data = f.create_dataset(id)
+        # save samples
+        pdata = fp.create_dataset(str(kic), np.shape(samples))
+        pdata[:] = samples
 
-    # calculate age samples.
+    # with h5py.File("results/acf_period_samples.h5", "r") as f:
+    #     data = f["{}".format(data.kepid.values[1])][...]
+    # print(data)
+
