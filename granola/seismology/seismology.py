@@ -7,10 +7,12 @@ import pandas as pd
 from multiprocessing import Pool
 
 import os
+import sys
 
 import kplr
 
 import gprot_fit as gp
+import emcee2_gprot_fit as e2
 import kepler_data as kd
 
 
@@ -32,8 +34,13 @@ def measure_periods(kic, KPLR_DIR):
     x, y, yerr = get_lc(kic, KPLR_DIR)
 
     # Use GProtation to get probabilistic rotation periods.
-    GP = gp.fit(x, y, yerr, kic)
-    GP.gp_fit(nsets=2, p_max=np.log(100))
+    emcee2 = True
+    if emcee2:
+        e2.gp_fit(x, y, yerr, kic, "results", p_max=np.log(100))
+    else:
+        GP = gp.fit(x, y, yerr, kic)
+        GP.gp_fit(burnin=2000, nwalkers=16, nruns=10, full_run=1000, nsets=2,
+                  p_max=np.log(100))
 
 
 def parallel(i):
@@ -53,6 +60,10 @@ def parallel(i):
 if __name__ == "__main__":
 
     nmetcalfe, nsilva = 17, 30
+    dataset = str(sys.argv[1])
 
     pool = Pool()
-    results = pool.map(parallel, range(nsilva))
+    if dataset == "metcalfe"
+        results = pool.map(parallel, range(nmetcalfe))
+    else:
+        results = pool.map(parallel, range(nsilva))
