@@ -1,5 +1,6 @@
-# The gauge
-Calibrating MS ages using galactic dynamics with Gaia, Kepler and APOGEE.
+#GRANOLA
+Testing gyrochronology at late ages and calibrating MS dating methods using
+galactic dynamics with Gaia, Kepler and APOGEE.
 
 Codez:
 -----
