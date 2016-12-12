@@ -1,6 +1,5 @@
 from __future__ import print_function
 import numpy as np
-import glob
 
 
 def simple_acf(x, y):
@@ -16,10 +15,10 @@ def simple_acf(x, y):
     x, y = time, lin_interp
 
     # fit and subtract straight line
-    AT = np.vstack((x, np.ones_like(x)))
-    ATA = np.dot(AT, AT.T)
-    m, b = np.linalg.solve(ATA, np.dot(AT, y))
-    y -= m*x + b
+    # AT = np.vstack((x, np.ones_like(x)))
+    # ATA = np.dot(AT, AT.T)
+    # m, b = np.linalg.solve(ATA, np.dot(AT, y))
+    # y -= m*x + b
 
     # perform acf
     acf = dan_acf(y)
@@ -75,9 +74,7 @@ def simple_acf(x, y):
     # find the highest peak
     if len(peaks):
         m = acf_smooth == max(acf_smooth[peaks])
-        highest_peak = acf_smooth[m][0]
         period = lags[m][0]
-        print(period)
     else:
         period = 0.
 
@@ -91,9 +88,9 @@ def find_nearest(array, value):
     return array[idx]
 
 
-# dan's acf function
 def dan_acf(x, axis=0, fast=False):
     """
+    DFM's acf function
     Estimate the autocorrelation function of a time series using the FFT.
     :param x:
         The time series. If multidimensional, set the time axis using the
@@ -123,17 +120,3 @@ def dan_acf(x, axis=0, fast=False):
     acf = np.fft.ifft(f * np.conjugate(f), axis=axis)[m].real
     m[axis] = 0
     return acf / acf[m]
-
-
-if __name__ == "__main__":
-
-    DIR = "."  # edit me!
-    fnames = glob.glob("%s/*.dat" % DIR)
-
-    for i, fname in enumerate(fnames[1:]):
-        id = fname.split("/")[-1].split("_")[0]  # edit me!
-        x, y, _, _ = np.genfromtxt(fname, skip_header=1).T
-        yerr = np.ones_like(y) * 1e-5  # FIXME
-
-        period, acf, lags = simple_acf(x, y)
-        make_plot(acf, lags, id)
