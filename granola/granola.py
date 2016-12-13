@@ -75,8 +75,8 @@ def gen_sample_set(d, i, N):
     #                                   d.tgas_ra_dec_corr[i][0])
     # pmra_samps, pmdec_samps = pm_samps
 
-    # return teff_samps, feh_samps, logg_samps, ra_samps, dec_samps, d_samps, \
-    #     pmra_samps, pmdec_samps, v_samps
+    return teff_samps, feh_samps, logg_samps, ra_samps, dec_samps, d_samps, \
+        pmra_samps, pmdec_samps, v_samps
 
 
 def gen_samps(N, mu, e1, e2=None):
