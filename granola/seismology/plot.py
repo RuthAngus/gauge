@@ -8,6 +8,7 @@ import pandas as pd
 import os
 
 DATA_DIR = "/export/bbq2/angusr/granola/granola/data"
+RESULTS_DIR = "/export/bbq2/angusr/granola/granola/results"
 
 # load metcalfe and silva catalogues and merge.
 met = pd.read_csv(os.path.join(DATA_DIR, "metcalfe.csv"))
@@ -19,6 +20,8 @@ data = pd.merge(met, sil, on="KIC", how="right")
 print(data.keys())
 
 # load samples.
+with h5py.File(os.path.join(RESULTS_DIR, "")
+for i, kic in enumerate(data.KIC.values):
 
 
 # calculate their ages.
