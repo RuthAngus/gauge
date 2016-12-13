@@ -36,7 +36,9 @@ def measure_periods(kic, KPLR_DIR):
     # Use GProtation to get probabilistic rotation periods.
     emcee2 = True
     if emcee2:
-        e2.gp_fit(x, y, yerr, kic, "results", p_max=np.log(100))
+        e2.gp_fit(x, y, yerr, kic, "results", burnin=5000,
+                  nwalkers=16, nruns=10, nsets=2, p_max=np.log(100),
+                  nsigma=2)
     else:
         GP = gp.fit(x, y, yerr, kic)
         GP.gp_fit(burnin=2000, nwalkers=16, nruns=10, full_run=1000, nsets=2,
