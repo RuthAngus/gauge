@@ -13,6 +13,14 @@ import os
 import barnes_age as ba
 import teff_bv as tb
 
+plotpar = {'axes.labelsize': 20,
+           'text.fontsize': 20,
+           'legend.fontsize': 20,
+           'xtick.labelsize': 15,
+           'ytick.labelsize': 15,
+           'text.usetex': True}
+plt.rcParams.update(plotpar)
+
 DATA_DIR = "/export/bbq2/angusr/granola/granola/data"
 RESULTS_DIR = "/export/bbq2/angusr/granola/granola/seismology/results"
 
@@ -35,6 +43,7 @@ for i, kic in enumerate(data.KIC.values):
     if len(vs.KIC.values[mv]):  # is it in the van Saders catalogue?
         in_vs = True
     print(int(kic))
+    # Find and load rotation period samples
     if os.path.exists(os.path.join(RESULTS_DIR, "{}.h5".format(int(kic)))):
         with h5py.File(os.path.join(RESULTS_DIR,
                        "{}.h5".format(int(kic))), "r") as f:
@@ -44,14 +53,12 @@ for i, kic in enumerate(data.KIC.values):
             p = np.median(psamps)
             perrp = np.percentile(psamps, 84) - p
             perrm = p - np.percentile(psamps, 16)
-            plt.errorbar(data.age.values[m], p, yerr=perrm, fmt="k.")
+            plt.errorbar(data.age.values[m], p, yerr=perrm, fmt="k.",
+                         capsize=0)
             if in_vs:
-                plt.errorbar(data.age.values[m], p, yerr=perrm, fmt="r.")
+                plt.errorbar(data.age.values[m], p, yerr=perrm, fmt=".",
+                             color="HotPink", capsize=0)
 
-plt.xlabel("Age (Gyr)")
-plt.ylabel("Period (days)")
+plt.xlabel("$\mathrm{Age~(Gyr)}$")
+plt.ylabel("$\mathrm{Period~(days)}$")
 plt.savefig("age_period")
-
-# calculate their ages.
-
-# plot rotation period vs age
