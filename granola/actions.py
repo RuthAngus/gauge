@@ -27,21 +27,29 @@ def action(ra_deg, dec_deg, d_kpc, pm_ra_masyr, pm_dec_masyr, v_los_kms):
 
     # (ra,dec) --> Galactic coordinates (l,b):
     lb = bovy_coords.radec_to_lb(ra_rad, dec_rad, degree=False, epoch=2000.0)
-    l_rad = lb[:, 0]
-    b_rad = lb[:, 1]
+    # l_rad = lb[:, 0]
+    # b_rad = lb[:, 1]
+    l_rad = lb[0]
+    b_rad = lb[1]
 
     # (l,b,d) --> Galactocentric cartesian coordinates (x,y,z):
     xyz = bovy_coords.lbd_to_XYZ(l_rad, b_rad, d_kpc, degree=False)
-    x_kpc = xyz[:, 0]
-    y_kpc = xyz[:, 1]
-    z_kpc = xyz[:, 2]
+    # x_kpc = xyz[:, 0]
+    # y_kpc = xyz[:, 1]
+    # z_kpc = xyz[:, 2]
+    x_kpc = xyz[0]
+    y_kpc = xyz[1]
+    z_kpc = xyz[2]
 
     # (x,y,z) --> Galactocentric cylindrical coordinates (R,z,phi):
     Rzphi = bovy_coords.XYZ_to_galcencyl(x_kpc, y_kpc, z_kpc,
                                          Xsun=X_gc_sun_kpc, Zsun=Z_gc_sun_kpc)
-    R_kpc = Rzphi[:, 0]
-    phi_rad = Rzphi[:, 1]
-    z_kpc = Rzphi[:, 2]
+    # R_kpc = Rzphi[:, 0]
+    # phi_rad = Rzphi[:, 1]
+    # z_kpc = Rzphi[:, 2]
+    R_kpc = Rzphi[0]
+    phi_rad = Rzphi[1]
+    z_kpc = Rzphi[2]
 
     # b. convert velocities (pm_ra,pm_dec,vlos) to (vR,vz,vT)
 
@@ -49,16 +57,21 @@ def action(ra_deg, dec_deg, d_kpc, pm_ra_masyr, pm_dec_masyr, v_los_kms):
     pmlpmb = bovy_coords.pmrapmdec_to_pmllpmbb(pm_ra_masyr, pm_dec_masyr,
                                                ra_rad, dec_rad, degree=False,
                                                epoch=2000.0)
-    pml_masyr = pmlpmb[:, 0]
-    pmb_masyr = pmlpmb[:, 1]
+    # pml_masyr = pmlpmb[:, 0]
+    # pmb_masyr = pmlpmb[:, 1]
+    pml_masyr = pmlpmb[0]
+    pmb_masyr = pmlpmb[1]
 
     # (v_los,pm_l,pm_b) & (l,b,d) --> (vx,vy,vz):
     vxvyvz = bovy_coords.vrpmllpmbb_to_vxvyvz(v_los_kms, pml_masyr, pmb_masyr,
                                               l_rad, b_rad, d_kpc, XYZ=False,
                                               degree=False)
-    vx_kms = vxvyvz[:, 0]
-    vy_kms = vxvyvz[:, 1]
-    vz_kms = vxvyvz[:, 2]
+    # vx_kms = vxvyvz[:, 0]
+    # vy_kms = vxvyvz[:, 1]
+    # vz_kms = vxvyvz[:, 2]
+    vx_kms = vxvyvz[0]
+    vy_kms = vxvyvz[1]
+    vz_kms = vxvyvz[2]
 
     # (vx,vy,vz) & (x,y,z) --> (vR,vT,vz):
     vRvTvZ = bovy_coords.vxvyvz_to_galcencyl(vx_kms, vy_kms, vz_kms, R_kpc,
@@ -67,9 +80,12 @@ def action(ra_deg, dec_deg, d_kpc, pm_ra_masyr, pm_dec_masyr, v_los_kms):
                                                    vY_gc_sun_kms,
                                                    vZ_gc_sun_kms],
                                              galcen=True)
-    vR_kms = vRvTvZ[:, 0]
-    vT_kms = vRvTvZ[:, 1]
-    vz_kms = vRvTvZ[:, 2]
+    # vR_kms = vRvTvZ[:, 0]
+    # vT_kms = vRvTvZ[:, 1]
+    # vz_kms = vRvTvZ[:, 2]
+    vR_kms = vRvTvZ[0]
+    vT_kms = vRvTvZ[1]
+    vz_kms = vRvTvZ[2]
 
     print("R = ", R_kpc, "\t kpc")
     print("phi = ", phi_rad, "\t rad")
