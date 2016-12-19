@@ -63,7 +63,7 @@ def gp_fit(x, y, yerr, sid, RESULTS_DIR, burnin=1000, nwalkers=16, nruns=5,
                                                          clobber=False)
 
     # set initial period
-    p_init = acf_period
+    p_init = pgram_period
     if not p_max:
         p_max = np.log((xb[0][-1] - xb[0][0]) / 2.)
     if p_init > np.exp(p_max):
