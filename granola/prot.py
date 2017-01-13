@@ -17,14 +17,23 @@ def get_lc(id, KPLR_DIR="/Users/ruthangus/.kplr/data/lightcurves"):
     Downloads the kplr light curve and loads x, y and yerr.
     """
     kid = str(int(id)).zfill(9)
-    client = kplr.API()
-    star = client.star(kid)
-    star.get_light_curves(fetch=True, short_cadence=False)
-    x, y, yerr = kd.load_kepler_data(os.path.join(KPLR_DIR, "{}".format(kid)))
+    path = os.path.join(KPLR_DIR, "{}".format(kid))
+    if not os.path.exists(path):
+        client = kplr.API()
+        star = client.star(kid)
+        print("Downloading LC...")
+        star.get_light_curves(fetch=True, short_cadence=False)
+        x, y, yerr = kd.load_kepler_data(os.path.join(KPLR_DIR,
+                                                      "{}".format(kid)))
+    else:
+        x, y, yerr = kd.load_kepler_data(os.path.join(KPLR_DIR,
+                                                      "{}".format(kid)))
+    x -= x[0]
     return x, y, yerr
 
 
-def get_period_samples(x, y, nsamps=1000, ndays=200, pfunc=.1):
+def get_period_samples(id, x, y, nsamps=1000, ndays=200, pfunc=.1, plot=False,
+                       RESULTS_DIR="results"):
     """
     Measure period with simple_acf using first ndays of data to reduce time.
     Generate samples from a Gaussian distribution centered on the period with
@@ -43,7 +52,18 @@ def get_period_samples(x, y, nsamps=1000, ndays=200, pfunc=.1):
         stdev during the sampling.
     Returns rotation period (days) and period samples.
     """
-    period, acf, lags, rvar = sa.simple_acf(x[:ndays], y[:ndays])
+    print("Measuring period...")
+    m = x < ndays
+    period, acf, lags, rvar = sa.simple_acf(x[m], y[m])
+    if plot:
+        plt.clf()
+        plt.subplot(2, 1, 1)
+        plt.plot(x[m], y[m], "k.")
+        plt.subplot(2, 1, 2)
+        plt.plot(lags, acf)
+        plt.xlabel("Lags (days)")
+        plt.ylabel("ACF")
+        plt.savefig(os.path.join(RESULTS_DIR, "{}_acf".format(id)))
     period_samps = period*pfunc*np.random.randn(nsamps) + period
     return period, period_samps
 
@@ -59,7 +79,7 @@ if __name__ == "__main__":
     data = pd.read_csv(os.path.join(DATA_DIR, "kic_tgas.csv"))
 
     # cut on temperature and logg
-    m = (6250 < data.teff.values) * (4 < data.logg.values)
+    m = (data.teff.values < 6250) * (4 < data.logg.values)
     data = data.iloc[m]
 
     fp = h5py.File(os.path.join(RESULTS_DIR, "acf_period_samples.h5"), "w")
@@ -67,13 +87,9 @@ if __name__ == "__main__":
     for i, kic in enumerate(data.kepid.values[:100]):
         print(kic, i, "of", len(data.kepid.values[:100]))
         x, y, yerr = get_lc(kic)
-        period, samples = get_period_samples(x, y)
+        period, samples = get_period_samples(int(kic), x, y, int(kic),
+                                             plot=True)
 
         # save samples
         pdata = fp.create_dataset(str(kic), np.shape(samples))
         pdata[:] = samples
-
-    # with h5py.File("results/acf_period_samples.h5", "r") as f:
-    #     data = f["{}".format(data.kepid.values[1])][...]
-    # print(data)
-
