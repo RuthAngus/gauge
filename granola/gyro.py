@@ -8,16 +8,16 @@ class gyro_age(object):
     def __init__(self, p, teff=None, feh=None, logg=None, bv=None):
 
         self.p = p
-        if not bv:
-            self.bv = teff2bv(teff, feh, logg)
+        self.bv = bv
+        if not self.bv:
+            self.bv = teff2bv(teff, logg, feh)
         self.teff = teff
         self.feh = feh
         self.logg = logg
 
-    def barnes07(self, par=[.4, .31, .55, .45]):
+    def barnes07(self, par=[.7725, .601, .4, .5189]):
         a, b, c, n = par
-        return 10**((np.log10(self.p) - np.log10(a) -
-                     b*np.log10(self.bv - c)) / n) / 1000.
+        return (self.p/(a*(self.bv - c)**b))**(1./n)*1e-3
 
     def barnes10(self, par):
         return par
@@ -27,3 +27,8 @@ class gyro_age(object):
 
     def vansaders16(self, par):
         return par
+
+if __name__ == "__main__":
+    ga = gyro_age(26, teff=5778, feh=0., logg=4.44)
+    ga = gyro_age(26, bv=.65)
+    print(ga.barnes07())

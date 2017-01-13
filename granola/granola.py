@@ -16,21 +16,20 @@ def get_properties(kic, data):
     Calculate age and J_z samples for a kic_tgas star.
     """
     i = data.kepid.values == kic
+    i = np.arange(len(data.kepid.values))[i][0]
 
-    try:
+    try:  # if a rotation measurement has been made.
         with h5py.File(os.path.join(RESULTS_DIR, "acf_period_samples.h5"),
                     "r") as f:
             p_samps = f["{}".format(kic)][...]
+        print("period samples found, period = ", np.mean(p_samps))
     except KeyError:
         return 0, [0, 0]
 
     # Generate all the samples.
-    try:
-        teff_samps, feh_samps, logg_samps, ra_samps, dec_samps, d_samps, \
-            pmra_samps, pmdec_samps, plx_samps, v_samps = \
-            gen_sample_set(data, i, len(p_samps))
-    except KeyError:
-        return 0, [0, 0]
+    teff_samps, feh_samps, logg_samps, ra_samps, dec_samps, d_samps, \
+        pmra_samps, pmdec_samps, plx_samps, v_samps = \
+        gen_sample_set(data, i, len(p_samps))
 
     # Calculate age samples.
     ga = gyro_age(p_samps, teff=teff_samps, feh=feh_samps, logg=logg_samps)
@@ -41,7 +40,13 @@ def get_properties(kic, data):
         action(ra_samps[0], dec_samps[0], d_samps[0], pmra_samps[0],
                pmdec_samps[0], v_samps[0])
 
-    return age_samps[0], Jz
+    print("age = {0:.2f}".format(np.mean(age_samps)),
+          "period = {0:.2f}".format(np.mean(p_samps)),
+          "teff = {0:.1f}".format(np.mean(teff_samps)))
+    print("Jz = {:.2}".format(Jz[0]), "\n")
+
+    return age_samps[0], Jz, np.mean(p_samps), np.mean(teff_samps), \
+        np.mean(logg_samps), np.mean(feh_samps)
 
 
 def gen_sample_set(d, i, N):
@@ -62,24 +67,24 @@ def gen_sample_set(d, i, N):
     v_samps = gen_samps(N, 0., 0.)
 
     # assign mean and stdev variables
-    ra, ra_err = d.tgas_ra.values[i][0], d.tgas_ra_error.values[i][0]
-    dec, dec_err = d.tgas_dec.values[i][0], d.tgas_dec_error.values[i][0]
-    pmra, pmra_err = d.tgas_pmra.values[i][0], d.tgas_pmra_error.values[i][0]
-    pmdec, pmdec_err = d.tgas_pmdec.values[i][0], d.tgas_pmdec.values[i][0]
-    plx = d.tgas_parallax.values[i][0]
-    plx_err = d.tgas_parallax_error.values[i][0]
+    ra, ra_err = d.tgas_ra.values[i], d.tgas_ra_error.values[i]
+    dec, dec_err = d.tgas_dec.values[i], d.tgas_dec_error.values[i]
+    pmra, pmra_err = d.tgas_pmra.values[i], d.tgas_pmra_error.values[i]
+    pmdec, pmdec_err = d.tgas_pmdec.values[i], d.tgas_pmdec.values[i]
+    plx = d.tgas_parallax.values[i]
+    plx_err = d.tgas_parallax_error.values[i]
 
     # assign covariance variables
-    ra_dec = d.tgas_ra_dec_corr.values[i][0]
-    ra_plx = d.tgas_ra_parallax_corr[i][0]
-    ra_pmra = d.tgas_ra_pmra_corr.values[i][0]
-    ra_pmdec = d.tgas_ra_pmdec_corr.values[i][0]
-    dec_plx = d.tgas_dec_parallax_corr[i][0]
-    dec_pmra = d.tgas_dec_pmra_corr.values[i][0]
-    dec_pmdec = d.tgas_dec_pmdec_corr.values[i][0]
-    plx_pmra = d.tgas_parallax_pmra_corr.values[i][0]
-    plx_pmdec = d.tgas_parallax_pmdec_corr.values[i][0]
-    pmra_pmdec = d.tgas_pmra_pmdec_corr.values[i][0]
+    ra_dec = d.tgas_ra_dec_corr.values[i]
+    ra_plx = d.tgas_ra_parallax_corr.values[i]
+    ra_pmra = d.tgas_ra_pmra_corr.values[i]
+    ra_pmdec = d.tgas_ra_pmdec_corr.values[i]
+    dec_plx = d.tgas_dec_parallax_corr.values[i]
+    dec_pmra = d.tgas_dec_pmra_corr.values[i]
+    dec_pmdec = d.tgas_dec_pmdec_corr.values[i]
+    plx_pmra = d.tgas_parallax_pmra_corr.values[i]
+    plx_pmdec = d.tgas_parallax_pmdec_corr.values[i]
+    pmra_pmdec = d.tgas_pmra_pmdec_corr.values[i]
 
     mus = np.array([ra, dec, pmra, pmdec, plx])
     C = np.matrix([[ra_err**2, ra_dec, ra_pmra, ra_pmdec, ra_plx],
@@ -129,17 +134,32 @@ if __name__ == "__main__":
     RESULTS_DIR = "results"
 
     # Load kic_tgas
-    data = pd.read_csv(os.path.join(DATA_DIR, "kic_tgas.csv"))
+    d = pd.read_csv(os.path.join(DATA_DIR, "kic_tgas.csv"))
 
     # cut on temperature and logg
-    m = (6250 < data.teff.values) * (4 < data.logg.values)
-    data = data.iloc[m]
+    m = (d.teff.values < 6250) * (4 < d.logg.values)
+    data = d.iloc[m]
 
-    plt.clf()
+    ages, Jzs = [np.zeros((len(data.kepid.values))) for i in range(2)]
     for i, kic in enumerate(data.kepid.values):
         print(kic, i, "of", len(data.kepid.values))
-        age, Jz = get_properties(kic, data)
-        plt.plot(age, Jz[0], "k.")
+        path = os.path.join(RESULTS_DIR, "{}.csv".format(int(kic)))
+        if os.path.exists(path):
+            df = pd.read_csv(path)
+            age, Jz = df.age.values, df.Jz.values
+        else:
+            age, Jz, period, teff, logg, feh = get_properties(kic, data)
+            dic = {"KIC": [int(kic)], "age": [age], "Jz": [Jz[0]],
+                   "period": [period], "teff": teff, "logg": [logg],
+                   "feh": [feh]}
+            df = pd.DataFrame(dic)
+            df.to_csv(path)
+        print(age, Jz[0])
+        ages[i], Jzs[i] = age, Jz[0]
+
+    plt.clf()
+    plt.plot(ages, Jzs, "k.")
     plt.xlabel("Age (Gyr)")
     plt.ylabel("Jz")
+    plt.ylim(0, 50)
     plt.savefig("age_Jz")
