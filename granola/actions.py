@@ -10,7 +10,8 @@ from galpy.potential import MWPotential2014 as pot
 from galpy.actionAngle import actionAngleStaeckel
 
 
-def action(ra_deg, dec_deg, d_kpc, pm_ra_masyr, pm_dec_masyr, v_los_kms):
+def action(ra_deg, dec_deg, d_kpc, pm_ra_masyr, pm_dec_masyr, v_los_kms,
+           verbose=False):
     ra_rad = ra_deg * (np.pi / 180.)  # RA [rad]
     dec_rad = dec_deg * (np.pi / 180.)  # dec [rad]
 
@@ -87,19 +88,20 @@ def action(ra_deg, dec_deg, d_kpc, pm_ra_masyr, pm_dec_masyr, v_los_kms):
     vT_kms = vRvTvZ[1]
     vz_kms = vRvTvZ[2]
 
-    print("R = ", R_kpc, "\t kpc")
-    print("phi = ", phi_rad, "\t rad")
-    print("z = ", z_kpc, "\t kpc")
-    print("v_R = ", vR_kms, "\t km/s")
-    print("v_T = ", vT_kms, "\t km/s")
-    print("v_z = ", vz_kms, "\t km/s")
+    if verbose:
+        print("R = ", R_kpc, "\t kpc")
+        print("phi = ", phi_rad, "\t rad")
+        print("z = ", z_kpc, "\t kpc")
+        print("v_R = ", vR_kms, "\t km/s")
+        print("v_T = ", vT_kms, "\t km/s")
+        print("v_z = ", vz_kms, "\t km/s")
 
     jR, lz, jz = calc_actions(R_kpc, phi_rad, z_kpc, vR_kms, vT_kms, vz_kms)
 
     return R_kpc, phi_rad, z_kpc, vR_kms, vT_kms, vz_kms, jR, lz, jz
 
 
-def calc_actions(R_kpc, phi_rad, z_kpc, vR_kms, vT_kms, vz_kms):
+def calc_actions(R_kpc, phi_rad, z_kpc, vR_kms, vT_kms, vz_kms, verbose=False):
     _REFR0 = 8.  # [kpc]  --> galpy length unit
     _REFV0 = 220.  # [km/s] --> galpy velocity unit
 
@@ -116,7 +118,8 @@ def calc_actions(R_kpc, phi_rad, z_kpc, vR_kms, vT_kms, vz_kms):
     aAS = actionAngleStaeckel(pot=pot, delta=0.45, c=True)
 
     jR, lz, jz = aAS(R, vR, vT, z, vz)
-    print("Radial action J_R = ", jR[0]*_REFR0*_REFV0, "\t kpc km/s")
-    print("Angular momentum L_z = ", lz[0]*_REFR0*_REFV0, "\t kpc km/s")
-    print("Vertical action J_z = ", jz[0]*_REFR0*_REFV0, "\t kpc km/s")
+    if verbose:
+        print("Radial action J_R = ", jR[0]*_REFR0*_REFV0, "\t kpc km/s")
+        print("Angular momentum L_z = ", lz[0]*_REFR0*_REFV0, "\t kpc km/s")
+        print("Vertical action J_z = ", jz[0]*_REFR0*_REFV0, "\t kpc km/s")
     return jR[0]*_REFR0*_REFV0, lz[0]*_REFR0*_REFV0, jz[0]*_REFR0*_REFV0,
