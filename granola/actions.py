@@ -116,7 +116,7 @@ def calc_actions(R_kpc, phi_rad, z_kpc, vR_kms, vT_kms, vz_kms):
     aAS = actionAngleStaeckel(pot=pot, delta=0.45, c=True)
 
     jR, lz, jz = aAS(R, vR, vT, z, vz)
-    print("Radial action J_R = ", jR*_REFR0*_REFV0, "\t kpc km/s")
-    print("Angular momentum L_z = ", lz*_REFR0*_REFV0, "\t kpc km/s")
-    print("Vertical action J_z = ", jz*_REFR0*_REFV0, "\t kpc km/s")
-    return jR*_REFR0*_REFV0, lz*_REFR0*_REFV0, jz*_REFR0*_REFV0,
+    print("Radial action J_R = ", jR[0]*_REFR0*_REFV0, "\t kpc km/s")
+    print("Angular momentum L_z = ", lz[0]*_REFR0*_REFV0, "\t kpc km/s")
+    print("Vertical action J_z = ", jz[0]*_REFR0*_REFV0, "\t kpc km/s")
+    return jR[0]*_REFR0*_REFV0, lz[0]*_REFR0*_REFV0, jz[0]*_REFR0*_REFV0,
