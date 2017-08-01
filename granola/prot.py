@@ -83,8 +83,8 @@ if __name__ == "__main__":
     data = data.iloc[m]
 
     fp = h5py.File(os.path.join(RESULTS_DIR, "acf_period_samples.h5"), "w")
-    for i, kic in enumerate(data.kepid.values[:200]):
-        print(kic, i, "of", len(data.kepid.values[:200]))
+    for i, kic in enumerate(data.kepid.values[:400]):
+        print(kic, i, "of", len(data.kepid.values[:400]))
         x, y, yerr = get_lc(kic)
         period, samples = get_period_samples(int(kic), x, y, int(kic),
                                              plot=True)

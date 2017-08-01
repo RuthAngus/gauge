@@ -125,7 +125,6 @@ if __name__ == "__main__":
     # lnages2, dispersions2, Ns2 = calc_dispersion(np.log10(d2.age_vs.values),
                                                  # d2.Jz_vs.values, 8)
     d_err2 = dispersions2 / (2 * Ns2 - 2)**.5
-    print(np.shape(lnages2), np.shape(dispersions2), np.shape(d_err2))
 
     plt.clf()
 
@@ -134,41 +133,50 @@ if __name__ == "__main__":
     rdisps = np.zeros((1000, 9))
     for i in range(1000):
         rage, rdisp, rNs = calc_dispersion(np.random.choice(
-                                           np.log10(d1.age.values[m1]),
+                                           (d1.age.values[m1]),
                                         size=len(np.log10(d1.age.values[m1]))),
                                         d1.Jz.values[m1], 8)
         rd_err = rdisp / (2 * rNs - 2)**.5
         rdisps[i, :] = rdisp
         # plt.step(rage, rdisp, color="k", alpha=.01)
 
-    plt.errorbar(rage - .5*(rage[1] - rage[0]),
-                np.array(rdisp), yerr=rd_err, fmt=".", capsize=0,
-                ms=.1, color="k", alpha=.1)
-    plt.step(rage, rdisp, label=("$\mathrm{Random}$"), color="k", alpha=.1)
-    rdisp_av = np.mean(rdisps)
-    rdisp_std = np.std(rdisps)
-    print(np.shape(rdisp_av), np.shape(rdisp_std))
-    assert 0
-    # plt.fill_between(
+    # plt.errorbar(rage - .5*(rage[1] - rage[0]),
+                # np.array(rdisp), yerr=rd_err, fmt=".", capsize=0,
+                # ms=.1, color="k", alpha=.1)
+    # plt.step(rage, rdisp, label=("$\mathrm{Random}$"), color="k", alpha=.1)
+    rdisp_av = np.mean(rdisps, axis=0)
+    rdisp_std = np.std(rdisps, axis=0)
+    print(np.mean(d1.Jz.values))
+    plt.axhline(np.mean(d1.Jz.values), color=".5", ls="--")
+    # plt.fill_between(rage, rdisp_av-rdisp_std, rdisp_av+rdisp_std,
+    #                  label="$\mathrm{Random}$", alpha=.2, color="k",
+    #                  edgecolor=".9", linewidth=0)
 
-    # plt.errorbar(lnages1 - .5*(lnages1[1] - lnages1[0]),
-    #              np.array(dispersions1), yerr=d_err1, fmt=".", capsize=0,
-    #              ms=.1, color="cornflowerblue")
-    plt.step(lnages1, dispersions1, label="$\mathrm{Model}~1$",
-             color="cornflowerblue")
+    plt.errorbar(lnages1 - .5*(lnages1[1] - lnages1[0]),
+                 np.array(dispersions1), yerr=d_err1, ms=5, fmt="o", capsize=0,
+                 color="cornflowerblue", label="$\mathrm{Model}~1$")
+    # plt.step(lnages1, dispersions1, label="$\mathrm{Model}~1$",
+    #          color="cornflowerblue")
 
-    # plt.errorbar(lnages2 - .5*(lnages2[1] - lnages2[0]),
-    #              np.array(dispersions2), yerr=d_err2, fmt=".", capsize=0,
-    #              ms=.1, color="orange")
-    plt.step(lnages2, dispersions2, label="$\mathrm{Model}~2$", color="orange")
+    plt.errorbar(lnages2 - .5*(lnages2[1] - lnages2[0]),
+                 np.array(dispersions2), yerr=d_err2, ms=5, fmt="o", capsize=0,
+                 color="orange", label="$\mathrm{Model}~2$")
+    # plt.step(lnages2, dispersions2, label="$\mathrm{Model}~2$",
+    #          color="orange")
 
-    plt.legend()
-    plt.xlim(-.4, 1.1)
+    plt.legend(loc="lower right")
+    # plt.xlim(-.2, 1)
     plt.xlabel("$\log_{10}(\mathrm{Age,~Gyr})$")
     plt.ylabel("$\sigma J_z~(\mathrm{Kpc~kms}^{-1})$")
     plt.subplots_adjust(left=.15, bottom=.15)
-    plt.ylim(0, 2)
+    # plt.ylim(.75, 1.4)
+    plt.ylim(0, 1.4)
+
+    dw = pd.read_csv("dwarf.txt")
+    plt.plot(np.log10(dw.age.values), dw.jz.values, ".7", ls="--")
+
     plt.savefig("log_age_dispersion_both.pdf")
+    plt.savefig("log_age_dispersion_both")
 
     plt.clf()
     plt.hist(d1.Jz.values[m1], 20, alpha=.5, edgecolor="k")
