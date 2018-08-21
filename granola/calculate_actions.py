@@ -140,11 +140,17 @@ def calc_action_errs(df, rv, rverr, nsamps):
         lzs, lzerrps, lzerrms = meds[:, -2], errps[:, -2], errms[:, -2]
         jrs, jrerrps, jrerrms = meds[:, -3], errps[:, -3], errms[:, -3]
     return np.vstack((jrs, lzs, jzs)).T, \
-        np.vstack((jrerrps, lzerrps, jzerrps)).T \
+        np.vstack((jrerrps, lzerrps, jzerrps)).T, \
         np.vstack((jrerrms, lzerrms, jzerrms)).T
 
 
 if __name__ == "__main__":
+
+    # print(action(np.array([19, 19]), np.array([30, 30]), np.array([10, 10]),
+    #              np.array([.1, .1]), np.array([.1, .1]),
+    #              np.array([100, 100])))
+    print(action(19, 30, 10, .1, .1, 100))
+    assert 0
     df = pd.read_csv("data/kic_tgas.csv")
     rvs = np.zeros(len(df.tgas_source_id.values))
     rverrs = np.zeros_like(rvs)

@@ -22,8 +22,8 @@ def test_calc_action_errs(nsamps):
     rverrs = np.zeros_like(rvs)
     action_errs = calc_action_errs(df.iloc[:3], rvs[:3], rverrs[:3], nsamps)
     print(np.shape(action_errs))
-    # pl.clf()
-    # pl.plot(df.pmra.values[:3], action_errs
+    pl.clf()
+    pl.plot(df.pmra.values[:3], action_errs[:, ]
 
 
 if __name__ == "__main__":

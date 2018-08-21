@@ -12,6 +12,31 @@ from galpy.actionAngle import actionAngleStaeckel
 
 def action(ra_deg, dec_deg, d_kpc, pm_ra_masyr, pm_dec_masyr, v_los_kms,
            verbose=False):
+    """
+    parameters:
+    ----------
+    ra_deg: (float)
+        RA in degrees.
+    dec_deg: (float)
+        Dec in degress.
+    d_kpc: (float)
+        Distance in kpc.
+    pm_ra_masyr: (float)
+        RA proper motion in mas/yr.
+    pm_decmasyr: (float)
+        Dec proper motion in mas/yr.
+    v_los_kms: (float)
+        RV in kms.
+    returns:
+    ------
+    R_kpc, phi_rad, z_kpc, vR_kms, vT_kms, vz_kms
+    jR: (float)
+        Radial action.
+    lz: (float)
+        Vertical ang mom.
+    jz: (float)
+        Vertical action.
+    """
     ra_rad = ra_deg * (np.pi / 180.)  # RA [rad]
     dec_rad = dec_deg * (np.pi / 180.)  # dec [rad]
 

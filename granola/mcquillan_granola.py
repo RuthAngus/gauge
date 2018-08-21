@@ -22,20 +22,23 @@ plt.rcParams.update(plotpar)
 
 def calc_dispersion(age, jz, nbins):
     hist_age, bins = np.histogram(age, nbins)  # make histogram
-    dispersions, Ns = [], []
+    dispersions, Ns, means = [], [], []
     m = age < bins[0]
     dispersions.append(RMS(jz[m]))
+    means.append(np.median(jz[m]))
     Ns.append(len(age[m]))
     for i in range(len(bins)-1):
-        m = (bins[0] < age) * (age < bins[i+1])
+        m = (bins[i] < age) * (age < bins[i+1])
         if len(age[m]):
             dispersions.append(RMS(jz[m]))
             Ns.append(len(age[m]))
-    return bins, np.array(dispersions), np.array(Ns)
+            means.append(np.median(jz[m]))
+    return bins, np.array(dispersions), np.array(Ns), np.array(means)
 
 
 def RMS(x):
-    return (np.median(x**2))**.5
+    # return (np.median(x**2))**.5
+    return np.std(x)**2
 
 
 def dispersion(ages, Jzs, minage, maxage):
@@ -58,25 +61,30 @@ def x_and_y(ages, Jzs):
 if __name__ == "__main__":
 
     DATA_DIR = "/Users/ruthangus/granola/granola/data"
-    d = pd.read_csv("ages_and_actions.csv")
+    d = pd.read_csv("data/ages_and_actions.csv")
     # d = pd.read_csv("ages_and_actions_vansaders.csv")
     m = (d.age.values > 0) * (d.age.values < 14)
     df = d.iloc[m]
 
-    ages, dispersions, Ns = calc_dispersion(df.age.values, df.Jz.values, 8)
+    ages, dispersions, Ns, means = calc_dispersion(df.age.values, df.Jz.values, 8)
     d_err = dispersions / (2 * Ns - 2)**.5
 
+    print(dispersions[:10], means[:10])
+    assert 0
     plt.clf()
-    plt.errorbar(ages - .5*(ages[1] - ages[0]), np.array(dispersions),
+    # plt.errorbar(ages - .5*(ages[1] - ages[0]), np.array(dispersions),
+    #              yerr=d_err, fmt="k.", capsize=0, ms=.1)
+    # plt.step(ages, dispersions, color="k")
+    plt.step(ages, means, color="k")
+    plt.errorbar(ages - .5*(ages[1] - ages[0]), np.array(means),
                  yerr=d_err, fmt="k.", capsize=0, ms=.1)
-    plt.step(ages, dispersions, color="k")
     plt.xlabel("$\mathrm{Age~Gyr}$")
     plt.ylabel("$\sigma J_z~(\mathrm{Kpc~kms}^{-1})$")
     plt.savefig("linear_age_dispersion.pdf")
     # plt.savefig("linear_age_dispersion_vansaders.pdf")
 
     m = np.log(df.age.values) > - 1
-    lnages, dispersions, Ns = calc_dispersion(np.log10(df.age.values[m]),
+    lnages, dispersions, Ns, means = calc_dispersion(np.log10(df.age.values[m]),
                                       df.Jz.values[m], 8)
     d_err = dispersions / (2 * Ns - 2)**.5
 
@@ -84,6 +92,9 @@ if __name__ == "__main__":
     plt.errorbar(lnages - .5*(lnages[1] - lnages[0]), np.array(dispersions),
                  yerr=d_err, fmt="k.", capsize=0, ms=.1)
     plt.step(lnages, dispersions, color="k")
+    # plt.errorbar(lnages - .5*(lnages[1] - lnages[0]), np.array(means),
+    #              yerr=d_err, fmt="k.", capsize=0, ms=.1)
+    # plt.step(lnages, means, color="k")
     plt.xlabel("$\log_{10}(\mathrm{Age,~Gyr})$")
     plt.ylabel("$\sigma J_z~(\mathrm{Kpc~kms}^{-1})$")
     # plt.xlim(-1, 2.6)
@@ -104,8 +115,8 @@ if __name__ == "__main__":
     Plot vansaders model and barnes model on the same axes.
     """
     DATA_DIR = "/Users/ruthangus/granola/granola/data"
-    d1 = pd.read_csv("ages_and_actions.csv")
-    d2 = pd.read_csv("ages_and_actions_vansaders.csv")
+    d1 = pd.read_csv("data/ages_and_actions.csv")
+    d2 = pd.read_csv("data/ages_and_actions_vansaders.csv")
     print(np.shape(d1), np.shape(d2))
     d = pd.merge(d1, d2, on="KIC", how="inner", suffixes=("", "_vs"))
 
@@ -128,29 +139,29 @@ if __name__ == "__main__":
 
     plt.clf()
 
-    # Random stars.
-    import random
-    rdisps = np.zeros((1000, 9))
-    for i in range(1000):
-        rage, rdisp, rNs = calc_dispersion(np.random.choice(
-                                           (d1.age.values[m1]),
-                                        size=len(np.log10(d1.age.values[m1]))),
-                                        d1.Jz.values[m1], 8)
-        rd_err = rdisp / (2 * rNs - 2)**.5
-        rdisps[i, :] = rdisp
-        # plt.step(rage, rdisp, color="k", alpha=.01)
+    # # Random stars.
+    # import random
+    # rdisps = np.zeros((1000, 9))
+    # for i in range(1000):
+    #     rage, rdisp, rNs = calc_dispersion(np.random.choice(
+    #                                        (d1.age.values[m1]),
+    #                                     size=len(np.log10(d1.age.values[m1]))),
+    #                                     d1.Jz.values[m1], 8)
+    #     rd_err = rdisp / (2 * rNs - 2)**.5
+    #     rdisps[i, :] = rdisp
+    #     # plt.step(rage, rdisp, color="k", alpha=.01)
 
-    # plt.errorbar(rage - .5*(rage[1] - rage[0]),
-                # np.array(rdisp), yerr=rd_err, fmt=".", capsize=0,
-                # ms=.1, color="k", alpha=.1)
-    # plt.step(rage, rdisp, label=("$\mathrm{Random}$"), color="k", alpha=.1)
-    rdisp_av = np.mean(rdisps, axis=0)
-    rdisp_std = np.std(rdisps, axis=0)
-    print(np.mean(d1.Jz.values))
-    plt.axhline(np.mean(d1.Jz.values), color=".5", ls="--")
-    # plt.fill_between(rage, rdisp_av-rdisp_std, rdisp_av+rdisp_std,
-    #                  label="$\mathrm{Random}$", alpha=.2, color="k",
-    #                  edgecolor=".9", linewidth=0)
+    # # plt.errorbar(rage - .5*(rage[1] - rage[0]),
+    #             # np.array(rdisp), yerr=rd_err, fmt=".", capsize=0,
+    #             # ms=.1, color="k", alpha=.1)
+    # # plt.step(rage, rdisp, label=("$\mathrm{Random}$"), color="k", alpha=.1)
+    # rdisp_av = np.mean(rdisps, axis=0)
+    # rdisp_std = np.std(rdisps, axis=0)
+    # print(np.mean(d1.Jz.values))
+    # plt.axhline(np.mean(d1.Jz.values), color=".5", ls="--")
+    # # plt.fill_between(rage, rdisp_av-rdisp_std, rdisp_av+rdisp_std,
+    # #                  label="$\mathrm{Random}$", alpha=.2, color="k",
+    # #                  edgecolor=".9", linewidth=0)
 
     plt.errorbar(lnages1 - .5*(lnages1[1] - lnages1[0]),
                  np.array(dispersions1), yerr=d_err1, ms=5, fmt="o", capsize=0,
@@ -170,9 +181,9 @@ if __name__ == "__main__":
     plt.ylabel("$\sigma J_z~(\mathrm{Kpc~kms}^{-1})$")
     plt.subplots_adjust(left=.15, bottom=.15)
     # plt.ylim(.75, 1.4)
-    plt.ylim(0, 1.4)
+    plt.ylim(0, 8)
 
-    dw = pd.read_csv("dwarf.txt")
+    dw = pd.read_csv("data/dwarf.txt")
     plt.plot(np.log10(dw.age.values), dw.jz.values, ".7", ls="--")
 
     plt.savefig("log_age_dispersion_both.pdf")
